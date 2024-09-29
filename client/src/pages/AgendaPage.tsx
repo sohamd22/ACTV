@@ -4,7 +4,7 @@ import { IoMdArrowBack } from 'react-icons/io';
 import WorkoutCard from '../components/Cards/DayCard';
 
 interface Workout {
-    name: string;
+    task: string;
     recommendations: string[];
     checklist: string[];
 }
@@ -19,38 +19,38 @@ const AgendaPage: React.FC = () => {
     const [agenda, setAgenda] = useState<DayAgenda[]>([
         {
             day: "Monday",
-            amWorkout: { name: "Yoga", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Running", recommendations: [], checklist: [] },
+            amWorkout: { task: "Yoga", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Running", recommendations: [], checklist: [] },
         },
         {
             day: "Tuesday",
-            amWorkout: { name: "Pilates", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Swimming", recommendations: [], checklist: [] },
+            amWorkout: { task: "Pilates", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Swimming", recommendations: [], checklist: [] },
         },
         {
             day: "Wednesday",
-            amWorkout: { name: "Strength Training", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Cycling", recommendations: [], checklist: [] },
+            amWorkout: { task: "Strength Training", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Cycling", recommendations: [], checklist: [] },
         },
         {
             day: "Thursday",
-            amWorkout: { name: "HIIT", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Boxing", recommendations: [], checklist: [] },
+            amWorkout: { task: "HIIT", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Boxing", recommendations: [], checklist: [] },
         },
         {
             day: "Friday",
-            amWorkout: { name: "Cardio", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Dancing", recommendations: [], checklist: [] },
+            amWorkout: { task: "Cardio", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Dancing", recommendations: [], checklist: [] },
         },
         {
             day: "Saturday",
-            amWorkout: { name: "CrossFit", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Hiking", recommendations: [], checklist: [] },
+            amWorkout: { task: "CrossFit", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Hiking", recommendations: [], checklist: [] },
         },
         {
             day: "Sunday",
-            amWorkout: { name: "Rest", recommendations: [], checklist: [] },
-            pmWorkout: { name: "Rest", recommendations: [], checklist: [] },
+            amWorkout: { task: "Rest", recommendations: [], checklist: [] },
+            pmWorkout: { task: "Rest", recommendations: [], checklist: [] },
         },
     ]);
 

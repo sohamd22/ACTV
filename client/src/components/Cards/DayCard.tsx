@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface Workout {
-  name: string;
+  task: string;
   recommendations: string[];
   checklist: string[];
 }
@@ -15,7 +15,7 @@ interface DayCardProps {
 const DayCard: React.FC<DayCardProps> = ({ day, amWorkout, pmWorkout }) => {
   const renderWorkout = (workout: Workout, timeOfDay: string) => (
     <div className='p-4 bg-neutral-900 flex flex-col gap-4 rounded-md'>
-      <h2 className="font-semibold text-lg">{timeOfDay} Workout: {workout.name}</h2>
+      <h2 className="font-semibold text-lg">{timeOfDay} Workout: {workout.task}</h2>
       <ul className='flex flex-col gap-1'>
         {workout.recommendations.map((item, index) => (
           <li key={index}>- {item}</li>

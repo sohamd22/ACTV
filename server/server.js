@@ -49,19 +49,36 @@ const functionDeclarations = [
                   description: 'Morning workout session',
                   properties: {
                     task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout' },
-                    nutrition: { type: 'STRING', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during, or after the workout' },
-                    recommendations: { type: 'STRING', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry with reason. keep this short and remove extra words, almost like a checklist' },
+                    recommendations: { type: 'ARRAY', 
+                      items: {
+                        type: "STRING",
+                        description: 'Recommendations like nutritions, weather/time-of-day etc' },
+                    },
+                    checklist: { type: 'ARRAY', 
+                      items: {
+                        type: "STRING",
+                        description: 'Items for a checklist to prepare for the task, short and sweet.' },
+                      }
+                    }
+                        
                   },
                 },
                 pm: {
                   type: 'OBJECT',
                   description: 'Evening workout session',
                   properties: {
-                    task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, HR zone, rest, recovery or distance for the workout' },
-                    nutrition: { type: 'STRING', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during or after the workout' },
-                    recommendations: { type: 'STRING', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry. keep this short and remove extra words, almost like a checklist' },
-                  },
-                },
+                    task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout' },
+                    recommendations: { type: 'ARRAY', 
+                      items: {
+                        type: "STRING",
+                        description: 'Recommendations like nutritions, weather/time-of-day etc' },
+                      },
+                    checklist: { type: 'ARRAY', 
+                      items: {
+                        type: "STRING",
+                        description: 'Items for a checklist to prepare for the task, short and sweet.' },
+                      }
+                    }
               },
             },
           },
@@ -167,18 +184,18 @@ function generatePrompt(userMessage, workoutHistory) {
     const workoutHistoryJSON = JSON.stringify(workoutHistory);
   
     const prompt = `
-  You are an expert fitness and nutrition coach and you use function calling to generate meal and training plans.
+  You are a fitness and nutrition coach that uses function calling.
   
-  Based on the user's message, decide whether to provide a personalized training plan or meal recipes for the upcoming week, but not both. If the user asks about a training plan, provide only the training plan. If the user asks about meal plans, provide only the meal recipes. Consider the user's workout history and adjust your response accordingly.
-  MAKE SURE TO FUNCTION CALL WHEN YOU NEED TO GENERATE MEALS OR A TRAINING PLAN EVEN IF IT IS VAGUELY RELATED TO THE TWO.
-
-  Respond in a clear and supportive tone.
-
-  User's Activity:
+  User's Workout History:
   ${workoutHistoryJSON}
   
   User's Message:
   ${userMessage}
+  
+  Based on the user's message, decide what to do.
+  Don't ask questions unless really required, just function call to either createTrainingPlan or createMealPlan
+
+  Respond in a clear and supportive tone.
   `;
   
     return prompt;
@@ -211,10 +228,12 @@ app.post('/chat', async (req, res) => {
       // For demonstration, we'll send them back to the user
       if (call[0].name in functions) {
         console.log(call.name);
-        res.json(functions[call.name](functionArgs));
+        res.json(functions[call[0].name](functionArgs));
+        return;
       }
 
       res.json(call);
+      return;
       } 
       else {
         res.json({name: "reply", args: { message: result.response.text() }});
