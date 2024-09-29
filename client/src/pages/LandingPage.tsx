@@ -1,31 +1,37 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import ButtonWithDescription from '../components/ButtonWithDescription'
 import GIF from '../components/GIF'
 import Logo from '../components/Logo'
+import { PiStarFourFill } from "react-icons/pi";
 
 const LandingPage = () => {
+    const navigate = useNavigate();
+
     return (
-        <div className="grid grid-cols-3">
-            <div className="flex flex-col items-start p-8 col-span-2">
-                <Logo />
+        <div className="container mx-auto h-screen items-center justify-center text-center flex flex-col gap-16" style={{backgroundImage: `url('')`}}>
+            {/* <Logo /> */}
+            <h1 className='font-semibold text-4xl'>Use your AI coach for <mark>motivation</mark></h1>
+            <div className="flex gap-8">
                 <ButtonWithDescription 
-                    buttonLabel="Button 1" 
-                    descriptionText="Description 1" 
-                    onButtonClick={() => console.log('Button 1 clicked')} 
+                    label="Coach Chat" 
+                    descriptionText="Your own personal AI coach to help you reach your fitness goals and generate weekly agendas all based on details of your life." 
+                    onClick={() => navigate('/chat')} 
+                    backgroundColor='bg-rose-600'
+                    icon={<PiStarFourFill size="1.25rem" className="absolute -right-2.5 -top-2.5" />}
                 />
                 <ButtonWithDescription 
-                    buttonLabel="Button 2" 
-                    descriptionText="Description 2" 
-                    onButtonClick={() => console.log('Button 2 clicked')} 
+                    label="Weekly Agenda" 
+                    descriptionText="View your weekly schedules, plan for every day with checklists, and reach your goals." 
+                    onClick={() => console.log('Button 2 clicked')} 
+                    backgroundColor='bg-blue-600'
                 />
                 <ButtonWithDescription 
-                    buttonLabel="Button 3" 
-                    descriptionText="Description 3" 
-                    onButtonClick={() => console.log('Button 3 clicked')} 
+                    label="My Meals" 
+                    descriptionText="Get meal plans based on your nutrition requirements, health stats, and dietary restrictions." 
+                    onClick={() => navigate('/meals')} 
+                    backgroundColor='bg-lime-600'
                 />
-            </div>
-            <div className="flex items-center justify-center col-span-1">
-                <GIF url="" />
             </div>
         </div>
     )

@@ -6,7 +6,7 @@ interface GIFProps {
 
 const GIF: React.FC<GIFProps> = ({ url }) => {
     return (
-        <img className='h-96 w-56 bg-neutral-400' src={url} alt="GIF" />
+        <img className='h-full w-full bg-neutral-800' src={url} alt="GIF" />
     );
 }
 

@@ -2,7 +2,7 @@ import React from 'react'
 
 const Logo = () => {
   return (
-    <div>Logo</div>
+    <h1 className='font-semibold text-4xl'>AI <mark>Fit</mark></h1>
   )
 }
 

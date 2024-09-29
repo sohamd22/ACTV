@@ -6,7 +6,7 @@ interface DescriptionProps {
 
 const Description: React.FC<DescriptionProps> = ({ text }) => {
     return (
-        <p>{text}</p>
+        <p className='font-light opacity-90'>{text}</p>
     )
 }
 

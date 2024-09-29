@@ -2,16 +2,15 @@ import React from 'react'
 
 interface ActionButtonProps {
     onClick: () => void;
-    label: string;
+    children: React.ReactNode;
+    backgroundColor: string;
+    textColor?: string;
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({ onClick, label }) => {
+const ActionButton: React.FC<ActionButtonProps> = ({ children, onClick, backgroundColor, textColor }) => {
     return (
-        <button 
-            onClick={onClick} 
-            className="bg-white text-white font-bold py-2 px-4 rounded"
-        >
-            { label }
+        <button onClick={onClick} className={`${backgroundColor || "bg-neutral-800"} ${textColor || "text-white"} font-medium w-fit h-fit py-2 px-4 flex gap-2 rounded-md items-center`}>
+            { children }
         </button>
     )
 }

@@ -9,7 +9,7 @@ body {
 }
 
 button, h1, h2 {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Space Mono', monospace !important;
 }
 
 @tailwind base;
