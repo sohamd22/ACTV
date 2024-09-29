@@ -46,7 +46,7 @@ const MealsPage: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="container mx-auto py-20 flex flex-col gap-20">
+        <div className="container max-w-[1080px] mx-auto py-20 flex flex-col gap-20">
             <div className="flex flex-col gap-8">
                 <button className='flex gap-2 w-fit items-center opacity-75' onClick={() => navigate('/')}><IoMdArrowBack size="1rem" /> Go Back</button>
                 <h1 className='font-semibold text-3xl'>Your saved <span><mark className='bg-lime-500'>meals</mark></span></h1>

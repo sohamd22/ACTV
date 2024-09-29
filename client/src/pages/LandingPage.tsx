@@ -9,7 +9,7 @@ const LandingPage = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="container mx-auto h-screen items-center justify-center text-center flex flex-col gap-16" style={{backgroundImage: `url('')`}}>
+        <div className="container max-w-[1080px] mx-auto h-screen items-center justify-center text-center flex flex-col gap-16" style={{backgroundImage: `url('')`}}>
             {/* <Logo /> */}
             <h1 className='font-semibold text-4xl'>Use your AI coach for <mark>motivation</mark></h1>
             <div className="flex gap-8">

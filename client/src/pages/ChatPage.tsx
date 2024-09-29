@@ -19,7 +19,7 @@ const Chat: React.FC = () => {
     };
 
     return (
-        <div className="container h-screen mx-auto py-20 flex flex-col gap-20">
+        <div className="container max-w-[1080px] h-screen mx-auto py-20 flex flex-col gap-20">
             <div className="flex flex-col gap-8">
                 <button className='flex gap-2 w-fit items-center opacity-75' onClick={() => navigate('/')}><IoMdArrowBack size="1rem" /> Go Back</button>
                 <h1 className='font-semibold text-3xl'>Ask for <span><mark className='bg-rose-500'>motivation</mark></span></h1>
