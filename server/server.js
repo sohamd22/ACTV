@@ -118,7 +118,7 @@ const getImageUrl = async (name) => {
 const functions = {
   createMealPlan: async (args) => {
     const message = args.message;
-    const mealPlans = arg.mealPlans;
+    const mealPlans = args.mealPlans;
     for (const meal of mealPlans) {
       meal.imageUrl = await getImageUrl(meal.mealName);
     }
