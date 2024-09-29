@@ -23,12 +23,6 @@ const openai = new OpenAI({
 
 // Routes
 
-// GET /
-// NOT REQUIRED AS OF NOW
-// app.get('/', (req, res) => {
-//   res.send('Hello World!');
-// });
-
 // POST /upload-workout
 app.post('/upload-workout', (req, res) => {
   const { userId, workoutData } = req.body;
@@ -96,17 +90,50 @@ app.post('/chat', async (req, res) => {
           parameters: {
             type: 'object',
             properties: {
+                message: {
+                    type: 'string',
+                    description: 'Details about why you chose that training plan based on user info.'
+                },
               trainingPlan: {
-                type: 'array', // array of week with day objects
+                type: 'array', // Array of days with workout details
                 description: 'Detailed training plan for the upcoming week.',
-                // have {day: monday, am: {name: cycling, nutrition: 20g, precautions:""}, pm:{name: running, nutrition: 20g, precautions:""}}
+                items: {
+                  type: 'object',
+                  properties: {
+                    day: {
+                      type: 'string',
+                      description: 'Day of the week',
+                    },
+                    am: {
+                      type: 'object',
+                      description: 'Morning workout session',
+                      properties: {
+                        name: { type: 'string', description: 'Name of the workout' },
+                        nutrition: { type: 'string', description: 'Nutrition advice for the workout' },
+                        precautions: { type: 'string', description: 'Any precautions to take' },
+                      },
+                      required: ['name', 'nutrition', 'precautions'],
+                    },
+                    pm: {
+                      type: 'object',
+                      description: 'Evening workout session',
+                      properties: {
+                        name: { type: 'string', description: 'Name of the workout' },
+                        nutrition: { type: 'string', description: 'Nutrition advice for the workout' },
+                        precautions: { type: 'string', description: 'Any precautions to take' },
+                      },
+                      required: ['name', 'nutrition', 'precautions'],
+                    },
+                  },
+                  required: ['day', 'am', 'pm'],
+                },
               },
             },
             required: ['trainingPlan'],
           },
         },
       ],
-      function_call: { name: 'create_training_plan' },
+      function_call: { name: 'createTrainingPlan' }, // Updated function name
     });
 
     const responseMessage = aiResponse.choices[0].message;
@@ -132,7 +159,7 @@ app.post('/chat', async (req, res) => {
 });
 
 // Start server
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3003;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
