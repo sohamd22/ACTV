@@ -11,36 +11,6 @@ const MealsPage: React.FC = () => {
             nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
             imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
         },
-        {
-            name: "Aloo Paratha",
-            recipe: ["Mix wheat flour, water, and salt to make dough", "Roll out dough, add potato filling, and cook on a pan"],
-            nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
-            imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
-        },
-        {
-            name: "Aloo Paratha",
-            recipe: ["Mix wheat flour, water, and salt to make dough", "Roll out dough, add potato filling, and cook on a pan"],
-            nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
-            imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
-        },
-        {
-            name: "Aloo Paratha",
-            recipe: ["Mix wheat flour, water, and salt to make dough", "Roll out dough, add potato filling, and cook on a pan"],
-            nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
-            imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
-        },
-        {
-            name: "Aloo Paratha",
-            recipe: ["Mix wheat flour, water, and salt to make dough", "Roll out dough, add potato filling, and cook on a pan"],
-            nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
-            imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
-        },
-        {
-            name: "Aloo Paratha",
-            recipe: ["Mix wheat flour, water, and salt to make dough", "Roll out dough, add potato filling, and cook on a pan"],
-            nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
-            imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
-        }
     ]);
 
     const navigate = useNavigate();

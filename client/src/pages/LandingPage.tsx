@@ -1,8 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import ButtonWithDescription from '../components/ButtonWithDescription'
-import GIF from '../components/GIF'
-import Logo from '../components/Logo'
+// import Logo from '../components/Logo'
 import { PiStarFourFill } from "react-icons/pi";
 
 const LandingPage = () => {
@@ -23,7 +22,7 @@ const LandingPage = () => {
                 <ButtonWithDescription 
                     label="Weekly Agenda" 
                     descriptionText="View your weekly schedules, plan for every day with checklists, and reach your goals." 
-                    onClick={() => console.log('Button 2 clicked')} 
+                    onClick={() => navigate('/agenda')} 
                     backgroundColor='bg-blue-600'
                 />
                 <ButtonWithDescription 

@@ -9,7 +9,7 @@ interface ChatInputProps {
 const ChatInput: React.FC<ChatInputProps> = ({ value, setValue, placeholder }) => {
     return (
         <textarea
-            className='p-4 bg-neutral-800 flex-grow rounded-md focus:outline-none focus:border border-blue-500 resize-none h-24'
+            className='p-4 bg-neutral-800 flex-grow rounded-md focus:outline-none focus:border border-blue-500 resize-none h-fit'
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={placeholder}

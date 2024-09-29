@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import ChatPage from "./pages/ChatPage";
 import MealsPage from "./pages/MealsPage";
+import AgendaPage from "./pages/AgendaPage";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="chat" element={<ChatPage />} />
         <Route path="meals" element={<MealsPage />} />
+        <Route path="agenda" element={<AgendaPage />} />
       </Routes>
     </BrowserRouter>
   );
