@@ -1,19 +1,127 @@
 // index.js
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import express from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import User from './models/userModel.js';
 import { config } from 'dotenv';
 config();
 
 const app = express();
 
+// Database
+mongoose.connect(process.env.ATLAS_URI)
+.then(() => { console.log("Connected to MongoDB Successfully"); })
+.catch((err) => { console.error(err); });
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+const functionDeclarations = [
+  {
+    name: 'createTrainingPlan',
+    parameters: {
+      type: 'OBJECT',
+      description: 'Generates a concise personalized training plan with proper distance and workout info and nutrition advice.',
+      properties: {
+          message: {
+              type: 'STRING',
+              description: 'Details about why you chose that training plan based on user info.'
+          },
+          trainingPlan: {
+            type: 'ARRAY', // Array of days with workout details
+            description: 'Detailed training plan for the upcoming week.',
+            items: {
+              type: 'OBJECT',
+              properties: {
+                day: {
+                  type: 'STRING',
+                  description: 'Day of the week',
+                },
+                am: {
+                  type: 'OBJECT',
+                  description: 'Morning workout session',
+                  properties: {
+                    task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout' },
+                    nutrition: { type: 'STRING', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during, or after the workout' },
+                    recommendations: { type: 'STRING', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry with reason. keep this short and remove extra words, almost like a checklist' },
+                  },
+                },
+                pm: {
+                  type: 'OBJECT',
+                  description: 'Evening workout session',
+                  properties: {
+                    task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, HR zone, rest, recovery or distance for the workout' },
+                    nutrition: { type: 'STRING', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during or after the workout' },
+                    recommendations: { type: 'STRING', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry. keep this short and remove extra words, almost like a checklist' },
+                  },
+                },
+              },
+            },
+          },
+      },
+      required: ['trainingPlan'],
+    },
+  },
+  {
+      name: 'createMealPlan',
+      parameters: {
+        type: 'OBJECT',
+        description: 'Generates a meal plan based on the workouts, considering macros.',
+        properties: {
+          message: {
+            type: 'STRING',
+            description: 'Details about why you chose that meal plan based on user info.',
+          },
+          mealPlans: {
+            type: 'ARRAY', // Array of meals
+            description: 'List of meal recipes for the upcoming week.',
+            items: {
+              type: 'OBJECT',
+              properties: {
+                mealName: { type: 'STRING', description: 'Name of the meal' },
+                ingredients: {
+                  type: 'ARRAY',
+                  items: { type: 'STRING' },
+                  description: 'List of ingredients',
+                },
+                macros: {
+                  type: 'OBJECT',
+                  properties: {
+                    calories: { type: 'NUMBER', description: 'Total calories' },
+                    protein: { type: 'NUMBER', description: 'Protein in grams' },
+                    carbs: { type: 'NUMBER', description: 'Carbohydrates in grams' },
+                    fat: { type: 'NUMBER', description: 'Fat in grams' },
+                  },
+                },
+                recipe: { type: 'STRING', description: 'Cooking recipe' },
+              },
+            },
+          },
+        },
+        required: ['mealPlans'],
+      },
+  }
+]
+
+const generativeModel = genAI.getGenerativeModel({
+  // Use a model that supports function calling, like a Gemini 1.5 model
+  model: "gemini-1.5-flash",
+
+  // Specify the function declaration.
+  tools: {
+    functionDeclarations,
+  },
+  generationConfig: {
+    temperature: 0
+  }
+});
 
 // Function to create a JWT
 const createToken = (user) => {
@@ -37,24 +145,18 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// In-memory storage for workout histories
-let workoutHistories = {}; // Key: userId, Value: array of workout data
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 // Helper function to generate the prompt for the LLM
-function generatePrompt(userPrompt, activities) {  
+function generatePrompt(userMessage, workoutHistory) {
+    const workoutHistoryJSON = JSON.stringify(workoutHistory);
+  
     const prompt = `
   You are a virtual fitness and nutrition coach.
   
-  User's Activity History:
-  ${JSON.stringify(activities)}
+  User's Workout History:
+  ${workoutHistoryJSON}
   
-  User's Prompt:
-  ${userPrompt}
+  User's Message:
+  ${userMessage}
   
   Based on the user's message, decide whether to provide a personalized training plan or meal recipes for the upcoming week, but not both. If the user asks about a training plan, provide only the training plan. If the user asks about meal plans, provide only the meal recipes. Consider the user's workout history and adjust your response accordingly.
   
@@ -62,142 +164,39 @@ function generatePrompt(userPrompt, activities) {
   `;
   
     return prompt;
-}
+  }
   
 // Routes
 // POST /chat
-app.post('/chat', verifyToken, async (req, res) => {
-  const { accessToken } = req.user; // Extract accessToken from decoded JWT
 
-  let activitiesResponse = [];
-  try {
-    activitiesResponse = await axios.get('https://www.strava.com/api/v3/athlete/activities', {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
+const chat = generativeModel.startChat();
 
-    res.json(activitiesResponse.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Failed to fetch activities');
-  }
+app.post('/chat', async (req, res) => {
+  const message = req.body.message;
+  const username = req.body.username;
 
-  const userPrompt = req.body.prompt;
+  const user = await User.findOne({ username });
 
   // Generate prompt
-  const prompt = generatePrompt(userPrompt, activitiesResponse.data);
+  const prompt = generatePrompt(message, []);
 
   try {
     // Use function calling to get structured data from the assistant
-    const aiResponse = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Use 'gpt-4' if you have access
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.0,
-      functions: [
-        {
-          name: 'createTrainingPlan',
-          description: 'Generates a concise personalized training plan with proper distance and workout info and nutrition advice.',
-          parameters: {
-            type: 'object',
-            properties: {
-                message: {
-                    type: 'string',
-                    description: 'Details about why you chose that training plan based on user info.'
-                },
-              trainingPlan: {
-                type: 'array', // Array of days with workout details
-                description: 'Detailed training plan for the upcoming week.',
-                items: {
-                  type: 'object',
-                  properties: {
-                    day: {
-                      type: 'string',
-                      description: 'Day of the week',
-                    },
-                    am: {
-                      type: 'object',
-                      description: 'Morning workout session',
-                      properties: {
-                        task: { type: 'string', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout' },
-                        nutrition: { type: 'string', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during, or after the workout' },
-                        recommendations: { type: 'string', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry with reason. keep this short and remove extra words, almost like a checklist' },
-                      },
-                      required: ['name', 'nutrition', 'recommendations'],
-                    },
-                    pm: {
-                      type: 'object',
-                      description: 'Evening workout session',
-                      properties: {
-                        task: { type: 'string', description: 'Name of the workout, details like - sets, time, HR zone, rest, recovery or distance for the workout' },
-                        nutrition: { type: 'string', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during or after the workout' },
-                        recommendations: { type: 'string', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry. keep this short and remove extra words, almost like a checklist' },
-                      },
-                      required: ['name', 'nutrition', 'precautions'],
-                    },
-                  },
-                  required: ['day', 'am', 'pm'],
-                },
-              },
-            },
-            required: ['trainingPlan'],
-          },
-        },
-        {
-            name: 'createMealPlan',
-            description: 'Generates a meal plan based on the workouts, considering macros.',
-            parameters: {
-              type: 'object',
-              properties: {
-                mealPlans: {
-                  type: 'array', // Array of meals
-                  description: 'List of meal recipes for the upcoming week.',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      mealName: { type: 'string', description: 'Name of the meal' },
-                      ingredients: {
-                        type: 'array',
-                        items: { type: 'string' },
-                        description: 'List of ingredients',
-                      },
-                      macros: {
-                        type: 'object',
-                        properties: {
-                          calories: { type: 'number', description: 'Total calories' },
-                          protein: { type: 'number', description: 'Protein in grams' },
-                          carbs: { type: 'number', description: 'Carbohydrates in grams' },
-                          fat: { type: 'number', description: 'Fat in grams' },
-                        },
-                        required: ['calories', 'protein', 'carbs', 'fat'],
-                      },
-                      instructions: { type: 'string', description: 'Cooking instructions' },
-                    },
-                    required: ['mealName', 'ingredients', 'macros', 'instructions'],
-                  },
-                },
-              },
-              required: ['mealPlans'],
-            },
-        },
-      ],
-      function_call: "auto", // Updated function name
-    });
+    const result = await chat.sendMessage(prompt);
 
-    const responseMessage = aiResponse.choices[0].message;
-
-    if (responseMessage.function_call) {
+    const call = result.response.functionCalls();
+    if (call) {
       // Parse the assistant's function call
-      const functionArgs = JSON.parse(responseMessage.function_call.arguments);
+      const functionArgs = call[0].args;
 
       // Here you can process the functionArgs as needed
       // For demonstration, we'll send them back to the user
 
-      res.json({
-        reply: 'Here is your personalized training plan and advice.',
-        data: functionArgs,
-      });
-    } else {
-      res.json({ reply: responseMessage.content });
-    }
+      res.json(call);
+      } 
+      else {
+        res.json({name: "reply", args: { message: result.response.text().data }});
+      }
   } catch (error) {
     console.error('Error communicating with LLM:', error);
     res.status(500).json({ error: 'Failed to get response from the AI assistant.' });
@@ -227,8 +226,24 @@ app.get('/auth/strava/callback', async (req, res) => {
     // Generate a JWT with the access token and athlete info
     const token = createToken({ accessToken: access_token, athleteId: athlete.id });
 
+    const username = athlete.username;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      const userData = (await axios.get('https://www.strava.com/api/v3/athlete/activities', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      })).data;
+      await User.create({ username, userData });
+    }
+    else {
+      user.userData = (await axios.get('https://www.strava.com/api/v3/athlete/activities', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      })).data;
+      await user.save();
+    }
+
     // Redirect to the React frontend with the token in query string
-    res.redirect(`http://localhost:3000/auth/callback?token=${token}`);
+    res.redirect(`http://localhost:3000/auth/callback?token=${token}&username=${username}`);
   } catch (error) {
     console.error(error);
     res.status(500).send('Authentication failed');
