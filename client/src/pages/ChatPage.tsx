@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ActionButton from '../components/ActionButton';
 import ChatInput from '../components/Chat/ChatInput';
+import DayCard from '../components/Cards/DayCard';
+import MealCard from '../components/Cards/MealCard';
 import { IoMdSend, IoMdArrowBack } from "react-icons/io";
 
 
@@ -11,12 +13,33 @@ const Chat: React.FC = () => {
     const [response, setResponse] = useState<any[]>([]);
 
     const navigate = useNavigate();
+    
+    const functions: any = {
+        createTrainingPlan: ({ message, trainingPlan }: { message: string, trainingPlan: any }): any => {
+            setResponse([<div>
+                { trainingPlan.map((day: any, index: number) => <DayCard key={index} day={day.day} amWorkout={day.am} pmWorkout={day.pm} />) }
+            </div>, message]);
+        },
+        createMealPlan: ({ message, mealPlan }: { message: string, mealPlan: any }): any => {
+            setResponse([
+                <div>
+                    {mealPlan.map((meal: any, index: number) => <MealCard key={index} name={meal.mealName} ingredients={meal.ingredients} recipe={meal.recipe} macros={meal.macros} imageUrl={meal.imageUrl} />)}
+                </div>
+                , message]);
+        }
+    }
 
     const handleSend = async () => {
         if (prompt.trim()) {
-            const token = localStorage.getItem('token');
-            const data = await axios.post('http://localhost:3003/chat', {prompt} ,{headers: {Authorization: token}});
-            setResponse([JSON.stringify(data)]);
+            const username = localStorage.getItem('username');
+            const data = (await axios.post('http://localhost:3003/chat', {username, message: prompt})).data;
+            console.log(data);
+            if (data?.name in functions) {
+                functions[data.name](data.args);
+            }
+            else if (data) {
+                setResponse([<p key={0}>{data.message}</p>]);
+            }
             setPrompt('');
         }
     };

@@ -110,6 +110,21 @@ const functionDeclarations = [
   }
 ]
 
+const getImageUrl = async (name) => {
+  const result = await axios.get(`https://pixabay.com/api/?key=46250428-bf5d707579ccde79f9a5a6d4e&q=${name}&image_type=photo`);
+  return result.data.hits[0].webformatURL;
+}
+
+const functions = {
+  createMealPlan: async ({ message, mealPlan }) => {
+    for (const meal of mealPlan) {
+      meal.imageUrl = await getImageUrl(meal.mealName);
+    }
+
+    return {message, mealPlan};
+  },
+}
+
 const generativeModel = genAI.getGenerativeModel({
   // Use a model that supports function calling, like a Gemini 1.5 model
   model: "gemini-1.5-flash",
@@ -191,6 +206,9 @@ app.post('/chat', async (req, res) => {
 
       // Here you can process the functionArgs as needed
       // For demonstration, we'll send them back to the user
+      if (call.name in functions) {
+        res.json(functions[call.name](functionArgs));
+      }
 
       res.json(call);
       } 

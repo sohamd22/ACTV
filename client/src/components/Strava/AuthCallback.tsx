@@ -8,10 +8,15 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     // Extract the token from the query parameters
     const token = searchParams.get('token');
+    const username = searchParams.get('username');
 
     if (token) {
       // Save the token in localStorage
       localStorage.setItem('token', token);
+
+      if (username) {
+        localStorage.setItem('username', username);
+      }
 
       // Redirect to home or another page
       navigate('/');

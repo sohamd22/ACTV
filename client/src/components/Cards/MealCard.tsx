@@ -3,11 +3,12 @@ import React from 'react';
 interface MealCardProps {
     name: string;
     recipe: string[];
-    nutrition: string[];
+    macros: object;
+    ingredients: string[];
     imageUrl: string;
 }
 
-const MealCard: React.FC<MealCardProps> = ({ name, recipe, nutrition, imageUrl }) => {
+const MealCard: React.FC<MealCardProps> = ({ name, recipe, macros, imageUrl, ingredients }) => {
     return (
         <div className='h-full rounded-md overflow-hidden'>
             <img src={imageUrl} alt={name} className="h-24 bg-neutral-800" />
@@ -16,8 +17,27 @@ const MealCard: React.FC<MealCardProps> = ({ name, recipe, nutrition, imageUrl }
                 <h2 className="font-semibold text-lg">{name}</h2>
 
                 <ul className='flex flex-col gap-1'>
-                    {nutrition.map((item, index) => (
-                        <li key={index}>- {item}</li>
+                    {Object.entries(macros).map(([key, value]) => (
+                        <li key={key}>
+                            {key}: {value}
+                        </li>
+                    ))}
+                </ul>
+
+                <ul className='flex flex-col gap-1'>
+                    {recipe.map((step, index) => (
+                        <li key={index}>
+                            {step}
+                        </li>
+                    ))}
+                </ul>
+
+                <ul className='flex flex-col gap-1'>
+                    {ingredients.map((item, index) => (
+                    <li key={index} className='flex items-center'>
+                        <input type="checkbox" className='mr-2' />
+                        {item}
+                    </li>
                     ))}
                 </ul>
             </div>

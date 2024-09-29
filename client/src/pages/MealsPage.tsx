@@ -4,14 +4,7 @@ import { IoMdArrowBack } from 'react-icons/io';
 import MealCard from '../components/Cards/MealCard';
 
 const MealsPage: React.FC = () => {
-    const [meals, setMeals] = useState<any>([
-        {
-            name: "Aloo Paratha",
-            recipe: ["Mix wheat flour, water, and salt to make dough", "Roll out dough, add potato filling, and cook on a pan"],
-            nutrition: ["Calories: 200", "Carbs: 40g", "Protein: 10g"],
-            imageUrl: "https://www.cookwithmanali.com/wp-content/uploads/2021/06/Aloo-Paratha.jpg"
-        },
-    ]);
+    const [meals, setMeals] = useState<any>([]);
 
     const navigate = useNavigate();
 
@@ -24,7 +17,7 @@ const MealsPage: React.FC = () => {
 
             <div className='grid grid-cols-5 gap-8'>
                 {meals.map((meal: any, index: number) => (
-                    <MealCard key={index} name={meal.name} recipe={meal.recipe} nutrition={meal.nutrition} imageUrl={meal.imageUrl} />
+                    <MealCard key={index} name={meal.name} recipe={meal.recipe} macros={meal.macros} imageUrl={meal.imageUrl} ingredients={meal.ingredients} />
                 ))}
             </div>       
         </div>
