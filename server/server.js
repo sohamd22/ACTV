@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 config();
 
@@ -13,33 +14,35 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
+// Function to create a JWT
+const createToken = (user) => {
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' }); // Token expires in 7 days
+};
+
+// Protect routes middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  
+  if (!token) {
+    return res.status(403).send('No token provided.');
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(500).send('Failed to authenticate token.');
+    }
+    req.user = decoded; // Save user info in request
+    next();
+  });
+};
+
 // In-memory storage for workout histories
 let workoutHistories = {}; // Key: userId, Value: array of workout data
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Routes
-
-// POST /upload-workout
-app.post('/upload-workout', (req, res) => {
-  const { userId, workoutData } = req.body;
-
-  if (!userId || !workoutData) {
-    return res.status(400).json({ error: 'userId and workoutData are required.' });
-  }
-
-  // Initialize user's workout history array if it doesn't exist
-  if (!workoutHistories[userId]) {
-    workoutHistories[userId] = [];
-  }
-
-  // Add the new workout data
-  workoutHistories[userId].push(workoutData);
-
-  res.json({ status: 'Workout data uploaded successfully.' });
 });
 
 // Helper function to generate the prompt for the LLM
@@ -61,9 +64,9 @@ function generatePrompt(userMessage, workoutHistory) {
   `;
   
     return prompt;
-  }
+}
   
-
+// Routes
 // POST /chat
 app.post('/chat', async (req, res) => {
   const { userId, message } = req.body;
@@ -193,6 +196,53 @@ app.post('/chat', async (req, res) => {
   } catch (error) {
     console.error('Error communicating with LLM:', error);
     res.status(500).json({ error: 'Failed to get response from the AI assistant.' });
+  }
+});
+
+app.get('/auth/strava', (req, res) => {
+  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${process.env.STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${process.env.STRAVA_REDIRECT_URI}&scope=read,activity:read_all`;
+  res.redirect(authUrl);
+});
+
+// Handle Strava callback
+app.get('/auth/strava/callback', async (req, res) => {
+  const { code } = req.query;
+
+  try {
+    // Exchange authorization code for access token
+    const tokenResponse = await axios.post('https://www.strava.com/oauth/token', {
+      client_id: process.env.STRAVA_CLIENT_ID,
+      client_secret: process.env.STRAVA_CLIENT_SECRET,
+      code: code,
+      grant_type: 'authorization_code'
+    });
+
+    const { access_token, athlete } = tokenResponse.data;
+
+    // Generate a JWT with the access token and athlete info
+    const token = createToken({ accessToken: access_token, athleteId: athlete.id });
+
+    // Redirect to the React frontend with the token in query string
+    res.redirect(`http://localhost:3000/auth/callback?token=${token}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Authentication failed');
+  }
+});
+
+
+app.get('/strava/activities', verifyToken, async (req, res) => {
+  const { accessToken } = req.user; // Extract accessToken from decoded JWT
+
+  try {
+    const activitiesResponse = await axios.get('https://www.strava.com/api/v3/athlete/activities', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    res.json(activitiesResponse.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to fetch activities');
   }
 });
 
