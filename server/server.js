@@ -171,7 +171,7 @@ app.post('/chat', async (req, res) => {
             },
         },
       ],
-      function_call: { "name": "auto" }, // Updated function name
+      function_call: "auto", // Updated function name
     });
 
     const responseMessage = aiResponse.choices[0].message;
