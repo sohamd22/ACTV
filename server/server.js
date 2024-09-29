@@ -55,7 +55,7 @@ ${workoutHistoryJSON}
 User's Message:
 ${userMessage}
 
-Based on the user's workout history and message, provide a personalized training plan for the upcoming week, including workout suggestions, nutrition advice, and any precautions. Also, consider recovery needs and weather conditions.
+Based on the user's workout history and message, provide a personalized training plan for the upcoming week, including workout suggestions, nutrition advice, and any recommendations. Also, consider recovery needs and weather conditions and include rest and recovery necessities.
 
 Respond in a clear and supportive tone.
 `;
@@ -82,11 +82,11 @@ app.post('/chat', async (req, res) => {
     const aiResponse = await openai.chat.completions.create({
       model: 'gpt-4o-mini', // Use 'gpt-4' if you have access
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
+      temperature: 0.0,
       functions: [
         {
           name: 'createTrainingPlan',
-          description: 'Generates a personalized training plan and nutrition advice.',
+          description: 'Generates a concise personalized training plan with proper distance and workout info and nutrition advice.',
           parameters: {
             type: 'object',
             properties: {
@@ -108,19 +108,19 @@ app.post('/chat', async (req, res) => {
                       type: 'object',
                       description: 'Morning workout session',
                       properties: {
-                        name: { type: 'string', description: 'Name of the workout' },
-                        nutrition: { type: 'string', description: 'Nutrition advice for the workout' },
-                        precautions: { type: 'string', description: 'Any precautions to take' },
+                        task: { type: 'string', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout' },
+                        nutrition: { type: 'string', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during, or after the workout' },
+                        recommendations: { type: 'string', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry with reason. keep this short and remove extra words, almost like a checklist' },
                       },
-                      required: ['name', 'nutrition', 'precautions'],
+                      required: ['name', 'nutrition', 'recommendations'],
                     },
                     pm: {
                       type: 'object',
                       description: 'Evening workout session',
                       properties: {
-                        name: { type: 'string', description: 'Name of the workout' },
-                        nutrition: { type: 'string', description: 'Nutrition advice for the workout' },
-                        precautions: { type: 'string', description: 'Any precautions to take' },
+                        task: { type: 'string', description: 'Name of the workout, details like - sets, time, HR zone, rest, recovery or distance for the workout' },
+                        nutrition: { type: 'string', description: 'Nutrition intake for during the workout like - exact amount of carbs, salts, electrolytes or water to consume before, during or after the workout' },
+                        recommendations: { type: 'string', description: 'Any recommendations to take depending on the weather, time of the day, or any gear to carry. keep this short and remove extra words, almost like a checklist' },
                       },
                       required: ['name', 'nutrition', 'precautions'],
                     },
