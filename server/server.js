@@ -218,7 +218,7 @@ app.post('/chat', async (req, res) => {
   const user = await User.findOne({ username });
 
   // Generate prompt
-  const prompt = generatePrompt(message, []);
+  const prompt = generatePrompt(message, user.userData);
 
   try {
     // Use function calling to get structured data from the assistant
