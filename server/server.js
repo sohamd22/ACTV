@@ -44,24 +44,25 @@ app.post('/upload-workout', (req, res) => {
 
 // Helper function to generate the prompt for the LLM
 function generatePrompt(userMessage, workoutHistory) {
-  const workoutHistoryJSON = JSON.stringify(workoutHistory);
-
-  const prompt = `
-You are a virtual fitness coach.
-
-User's Workout History:
-${workoutHistoryJSON}
-
-User's Message:
-${userMessage}
-
-Based on the user's workout history and message, provide a personalized training plan for the upcoming week, including workout suggestions, nutrition advice, and any recommendations. Also, consider recovery needs and weather conditions and include rest and recovery necessities.
-
-Respond in a clear and supportive tone.
-`;
-
-  return prompt;
-}
+    const workoutHistoryJSON = JSON.stringify(workoutHistory);
+  
+    const prompt = `
+  You are a virtual fitness and nutrition coach.
+  
+  User's Workout History:
+  ${workoutHistoryJSON}
+  
+  User's Message:
+  ${userMessage}
+  
+  Based on the user's message, decide whether to provide a personalized training plan or meal recipes for the upcoming week, but not both. If the user asks about a training plan, provide only the training plan. If the user asks about meal plans, provide only the meal recipes. Consider the user's workout history and adjust your response accordingly.
+  
+  Respond in a clear and supportive tone.
+  `;
+  
+    return prompt;
+  }
+  
 
 // POST /chat
 app.post('/chat', async (req, res) => {
@@ -132,8 +133,45 @@ app.post('/chat', async (req, res) => {
             required: ['trainingPlan'],
           },
         },
+        {
+            name: 'createMealPlan',
+            description: 'Generates a meal plan based on the workouts, considering macros.',
+            parameters: {
+              type: 'object',
+              properties: {
+                mealPlans: {
+                  type: 'array', // Array of meals
+                  description: 'List of meal recipes for the upcoming week.',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      mealName: { type: 'string', description: 'Name of the meal' },
+                      ingredients: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        description: 'List of ingredients',
+                      },
+                      macros: {
+                        type: 'object',
+                        properties: {
+                          calories: { type: 'number', description: 'Total calories' },
+                          protein: { type: 'number', description: 'Protein in grams' },
+                          carbs: { type: 'number', description: 'Carbohydrates in grams' },
+                          fat: { type: 'number', description: 'Fat in grams' },
+                        },
+                        required: ['calories', 'protein', 'carbs', 'fat'],
+                      },
+                      instructions: { type: 'string', description: 'Cooking instructions' },
+                    },
+                    required: ['mealName', 'ingredients', 'macros', 'instructions'],
+                  },
+                },
+              },
+              required: ['mealPlans'],
+            },
+        },
       ],
-      function_call: { name: 'createTrainingPlan' }, // Updated function name
+      function_call: { "name": "auto" }, // Updated function name
     });
 
     const responseMessage = aiResponse.choices[0].message;
