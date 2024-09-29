@@ -46,17 +46,15 @@ const openai = new OpenAI({
 });
 
 // Helper function to generate the prompt for the LLM
-function generatePrompt(userMessage, workoutHistory) {
-    const workoutHistoryJSON = JSON.stringify(workoutHistory);
-  
+function generatePrompt(userPrompt, activities) {  
     const prompt = `
   You are a virtual fitness and nutrition coach.
   
-  User's Workout History:
-  ${workoutHistoryJSON}
+  User's Activity History:
+  ${JSON.stringify(activities)}
   
-  User's Message:
-  ${userMessage}
+  User's Prompt:
+  ${userPrompt}
   
   Based on the user's message, decide whether to provide a personalized training plan or meal recipes for the upcoming week, but not both. If the user asks about a training plan, provide only the training plan. If the user asks about meal plans, provide only the meal recipes. Consider the user's workout history and adjust your response accordingly.
   
@@ -68,18 +66,25 @@ function generatePrompt(userMessage, workoutHistory) {
   
 // Routes
 // POST /chat
-app.post('/chat', async (req, res) => {
-  const { userId, message } = req.body;
+app.post('/chat', verifyToken, async (req, res) => {
+  const { accessToken } = req.user; // Extract accessToken from decoded JWT
 
-  if (!userId || !message) {
-    return res.status(400).json({ error: 'userId and message are required.' });
+  let activitiesResponse = [];
+  try {
+    activitiesResponse = await axios.get('https://www.strava.com/api/v3/athlete/activities', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    res.json(activitiesResponse.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to fetch activities');
   }
 
-  // Fetch user's workout history
-  const userWorkoutHistory = workoutHistories[userId] || [];
+  const userPrompt = req.body.prompt;
 
   // Generate prompt
-  const prompt = generatePrompt(message, userWorkoutHistory);
+  const prompt = generatePrompt(userPrompt, activitiesResponse.data);
 
   try {
     // Use function calling to get structured data from the assistant
@@ -227,22 +232,6 @@ app.get('/auth/strava/callback', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Authentication failed');
-  }
-});
-
-
-app.get('/strava/activities', verifyToken, async (req, res) => {
-  const { accessToken } = req.user; // Extract accessToken from decoded JWT
-
-  try {
-    const activitiesResponse = await axios.get('https://www.strava.com/api/v3/athlete/activities', {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-
-    res.json(activitiesResponse.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Failed to fetch activities');
   }
 });
 

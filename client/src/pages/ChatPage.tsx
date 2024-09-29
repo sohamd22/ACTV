@@ -15,7 +15,7 @@ const Chat: React.FC = () => {
     const handleSend = async () => {
         if (prompt.trim()) {
             const token = localStorage.getItem('token');
-            const data = await axios.get('http://localhost:3003/strava/activities', {headers: {Authorization: token}});
+            const data = await axios.post('http://localhost:3003/chat', {prompt} ,{headers: {Authorization: token}});
             setResponse([JSON.stringify(data)]);
             setPrompt('');
         }
