@@ -14,16 +14,16 @@ interface DayCardProps {
 
 const DayCard: React.FC<DayCardProps> = ({ day, amWorkout, pmWorkout }) => {
   const renderWorkout = (workout: Workout, timeOfDay: string) => (
-    <div className='p-4 bg-neutral-900 flex flex-col gap-4 rounded-md'>
+    <div className='p-4 h-full bg-neutral-900 flex flex-col gap-4 rounded-md'>
       <h2 className="font-semibold text-lg">{timeOfDay} Workout: {workout.task}</h2>
       <ul className='flex flex-col gap-1'>
-        {workout.recommendations.map((item, index) => (
+        {workout.recommendations?.map((item, index) => (
           <li key={index}>- {item}</li>
         ))}
       </ul>
       <h3 className="font-semibold">Checklist:</h3>
       <ul className='flex flex-col gap-1'>
-        {workout.checklist.map((item, index) => (
+        {workout.checklist?.map((item, index) => (
           <li key={index} className='flex items-center'>
             <input type="checkbox" className='mr-2' />
             {item}

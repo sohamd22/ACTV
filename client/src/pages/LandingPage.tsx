@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import Logo from '../components/Logo';
 import ButtonWithDescription from '../components/ButtonWithDescription'
 // import Logo from '../components/Logo'
 import { PiStarFourFill } from "react-icons/pi";
@@ -11,8 +12,8 @@ const LandingPage = () => {
     return (
         <div className="bg-no-repeat bg-cover" style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('/images/bg.gif')`}}>
             <div className="container max-w-[1080px] mx-auto h-screen items-center justify-center text-center flex flex-col gap-16">
-                {/* <Logo /> */}
-                <h1 className='font-semibold text-4xl'>Your own personal AI <mark>coach</mark></h1>
+                <Logo />
+                <h1 className='font-semibold text-4xl'>The only fitness <mark>coach</mark> you'll ever need.</h1>
                 <div className="flex gap-8">
                     <ButtonWithDescription 
                         label="Coach Chat" 

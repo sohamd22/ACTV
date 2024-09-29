@@ -62,24 +62,25 @@ const functionDeclarations = [
                     }
                         
                   },
-                },
-                pm: {
-                  type: 'OBJECT',
-                  description: 'Evening workout session',
-                  properties: {
-                    task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout' },
-                    recommendations: { type: 'ARRAY', 
-                      items: {
-                        type: "STRING",
-                        description: 'Recommendations like nutritions, weather/time-of-day etc' },
+                  pm: {
+                    type: 'OBJECT',
+                    description: 'Evening workout session',
+                    properties: {
+                      task: { type: 'STRING', description: 'Name of the workout, details like - sets, time, pace, HR zone, rest, recovery or distance for the workout.' },
+                      recommendations: { type: 'ARRAY', 
+                        items: {
+                          type: "STRING",
+                          description: 'Recommendations like nutritions, weather/time-of-day etc' 
+                        },
                       },
-                    checklist: { type: 'ARRAY', 
-                      items: {
-                        type: "STRING",
-                        description: 'Items for a checklist to prepare for the task, short and sweet.' },
+                      checklist: { type: 'ARRAY', 
+                        items: {
+                          type: "STRING",
+                          description: 'Items for a checklist to prepare for the task, short and sweet.' },
+                        }
                       }
-                    }
-              },
+                },
+                },
             },
           },
       },
@@ -117,7 +118,11 @@ const functionDeclarations = [
                     fat: { type: 'NUMBER', description: 'Fat in grams' },
                   },
                 },
-                recipe: { type: 'STRING', description: 'Cooking recipe' },
+                recipe: {
+                  type: 'ARRAY',
+                  items: { type: 'STRING', description: 'A step in the recipe' },
+                  description: 'Steps of recipe',
+                },
               },
             },
           },
@@ -134,13 +139,13 @@ const getImageUrl = async (name) => {
 
 const functions = {
   createMealPlan: async (args) => {
+    console.log(args);
     const message = args.message;
     const mealPlans = args.mealPlans;
     for (const meal of mealPlans) {
       meal.imageUrl = await getImageUrl(meal.mealName);
     }
-
-    return {message, mealPlans};
+    return {name: 'createMealPlan', args: {message, mealPlans}};
   },
 }
 
@@ -227,8 +232,9 @@ app.post('/chat', async (req, res) => {
       // Here you can process the functionArgs as needed
       // For demonstration, we'll send them back to the user
       if (call[0].name in functions) {
-        console.log(call.name);
-        res.json(functions[call[0].name](functionArgs));
+        console.log(call[0].name);
+        const data = await functions[call[0].name](functionArgs);
+        res.json(data);
         return;
       }
 
