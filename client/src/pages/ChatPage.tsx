@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ActionButton from '../components/ActionButton';
@@ -7,13 +8,20 @@ import { IoMdSend, IoMdArrowBack } from "react-icons/io";
 
 const Chat: React.FC = () => {
     const [prompt, setPrompt] = useState('');
-    const [messages, setMessages] = useState<string[]>([]);
+    const [response, setResponse] = useState<any[]>([]);
 
     const navigate = useNavigate();
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (prompt.trim()) {
-            setMessages([...messages, prompt]);
+            const apiResponse = await axios.get('http://localhost:3003/auth', {
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+                  }
+            });
+
+            setResponse([...response, prompt]);
             setPrompt('');
         }
     };
@@ -27,7 +35,7 @@ const Chat: React.FC = () => {
             
             <div className="flex flex-col gap-20 mt-auto w-full">
                 <div>
-
+                    { response }
                 </div>
 
                 <div className="flex w-full gap-4">
