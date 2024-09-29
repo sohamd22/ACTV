@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ButtonWithDescription from '../components/ButtonWithDescription'
 // import Logo from '../components/Logo'
 import { PiStarFourFill } from "react-icons/pi";
+import StravaAuthButton from '../components/Strava/StravaAuthButton';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -33,6 +34,7 @@ const LandingPage = () => {
                         backgroundColor='bg-lime-600'
                     />
                 </div>
+                <StravaAuthButton />
             </div>
         </div>
         

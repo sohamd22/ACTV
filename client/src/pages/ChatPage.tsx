@@ -14,14 +14,9 @@ const Chat: React.FC = () => {
 
     const handleSend = async () => {
         if (prompt.trim()) {
-            const apiResponse = await axios.get('http://localhost:3003/auth', {
-                headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
-                  }
-            });
-
-            setResponse([...response, prompt]);
+            const token = localStorage.getItem('token');
+            const data = await axios.get('http://localhost:3003/strava/activities', {headers: {Authorization: token}});
+            setResponse([JSON.stringify(data)]);
             setPrompt('');
         }
     };

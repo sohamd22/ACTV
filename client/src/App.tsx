@@ -3,6 +3,8 @@ import LandingPage from "./pages/LandingPage";
 import ChatPage from "./pages/ChatPage";
 import MealsPage from "./pages/MealsPage";
 import AgendaPage from "./pages/AgendaPage";
+import AuthCallback from "./components/Strava/AuthCallback";
+
 
 function App() {
   return (
@@ -12,6 +14,7 @@ function App() {
         <Route path="chat" element={<ChatPage />} />
         <Route path="meals" element={<MealsPage />} />
         <Route path="agenda" element={<AgendaPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
       </Routes>
     </BrowserRouter>
   );
