@@ -116,12 +116,14 @@ const getImageUrl = async (name) => {
 }
 
 const functions = {
-  createMealPlan: async ({ message, mealPlan }) => {
-    for (const meal of mealPlan) {
+  createMealPlan: async (args) => {
+    const message = args.message;
+    const mealPlans = arg.mealPlans;
+    for (const meal of mealPlans) {
       meal.imageUrl = await getImageUrl(meal.mealName);
     }
 
-    return {message, mealPlan};
+    return {message, mealPlans};
   },
 }
 
@@ -134,7 +136,7 @@ const generativeModel = genAI.getGenerativeModel({
     functionDeclarations,
   },
   generationConfig: {
-    temperature: 0
+    temperature: 0.3
   }
 });
 
@@ -165,17 +167,18 @@ function generatePrompt(userMessage, workoutHistory) {
     const workoutHistoryJSON = JSON.stringify(workoutHistory);
   
     const prompt = `
-  You are a virtual fitness and nutrition coach.
+  You are an expert fitness and nutrition coach and you use function calling to generate meal and training plans.
   
-  User's Workout History:
+  Based on the user's message, decide whether to provide a personalized training plan or meal recipes for the upcoming week, but not both. If the user asks about a training plan, provide only the training plan. If the user asks about meal plans, provide only the meal recipes. Consider the user's workout history and adjust your response accordingly.
+  MAKE SURE TO FUNCTION CALL WHEN YOU NEED TO GENERATE MEALS OR A TRAINING PLAN EVEN IF IT IS VAGUELY RELATED TO THE TWO.
+
+  Respond in a clear and supportive tone.
+
+  User's Activity:
   ${workoutHistoryJSON}
   
   User's Message:
   ${userMessage}
-  
-  Based on the user's message, decide whether to provide a personalized training plan or meal recipes for the upcoming week, but not both. If the user asks about a training plan, provide only the training plan. If the user asks about meal plans, provide only the meal recipes. Consider the user's workout history and adjust your response accordingly.
-  
-  Respond in a clear and supportive tone.
   `;
   
     return prompt;
@@ -206,14 +209,15 @@ app.post('/chat', async (req, res) => {
 
       // Here you can process the functionArgs as needed
       // For demonstration, we'll send them back to the user
-      if (call.name in functions) {
+      if (call[0].name in functions) {
+        console.log(call.name);
         res.json(functions[call.name](functionArgs));
       }
 
       res.json(call);
       } 
       else {
-        res.json({name: "reply", args: { message: result.response.text().data }});
+        res.json({name: "reply", args: { message: result.response.text() }});
       }
   } catch (error) {
     console.error('Error communicating with LLM:', error);
